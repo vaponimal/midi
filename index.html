@@ -56,7 +56,7 @@
             top: 0;
             z-index: 50;
             backdrop-filter: saturate(140%) blur(6px);
-                        justify-content: space-between;
+            justify-content: space-between;
 
         }
 
@@ -388,22 +388,22 @@
     <div class="float-notes" id="floatNotes"></div>
     <header>
         <!-- <div class="navigation" aria-label="Main Navigation"> -->
-            <div class="pilltransparent">
+        <div class="pilltransparent">
             <div class="logo" aria-hidden="true"></div>
             <div>
                 <h1>Virtual MIDI Keyboard</h1>
                 <div class="subtitle">Learn notes, scales, chords — and train your ears with a playful keyboard.</div>
             </div>
-            </div>
+        </div>
 
-            <!-- PANEL TOP -->
-            <div class="tabs" role="tablist">
-                <div class="tab active" data-tab="notes" role="tab" aria-selected="true">🎹 Notes</div>
-                <div class="tab" data-tab="scales" role="tab">📈 Scales</div>
-                <div class="tab" data-tab="chords" role="tab">🎼 Chords</div>
-                <div class="tab" data-tab="ear" role="tab">👂 Ear Training</div>
-                <div class="tab" data-tab="demo" role="tab">🎵 Demo Songs</div>
-            </div>
+        <!-- PANEL TOP -->
+        <div class="tabs" role="tablist">
+            <div class="tab active" data-tab="notes" role="tab" aria-selected="true">🎹 Notes</div>
+            <div class="tab" data-tab="scales" role="tab">📈 Scales</div>
+            <div class="tab" data-tab="chords" role="tab">🎼 Chords</div>
+            <div class="tab" data-tab="ear" role="tab">👂 Ear Training</div>
+            <div class="tab" data-tab="demo" role="tab">🎵 Demo Songs</div>
+        </div>
         <!-- </div> -->
     </header>
 
@@ -531,6 +531,7 @@
     <div class="piano-wrap">
         <div class="piano-toolbar">
             <div class="row">
+                <button id="sustain">Sustain: Off</button>
                 <span class="pilltransparent"><span style="opacity:.7">Start</span>
                     <select id="rangeStart"></select>
                 </span>
@@ -540,7 +541,6 @@
                 <button id="applyRange">Apply Range</button>
             </div>
             <div class="row">
-                <button id="sustain">Sustain: Off</button>
                 <span>
                     <button id="volumeBtn" type="button" style="min-width:5rem"></button>
                     <input id="volume" type="range" min="0" max="1" step="0.01" value="0.4"
@@ -555,10 +555,11 @@
                         <option value="sawtooth">sawtooth</option>
                     </select>
                 </span>
+                <button id="stopAllNotes">Suspend</button>
+
             </div>
             <!-- <div class='row'>
                 <button id="clearHighlights">Clear Highlights</button>
-                <button id="stopAllNotes">Suspend</button>
             </div> -->
         </div>
         <div class="piano-viewport">
@@ -728,42 +729,24 @@
                 });
                 activeOscillators = [];
             }
-            // function clearHighlights() {
-            //     // clear white labels/bolds
-            //     pianoEl.querySelectorAll('.white').forEach(w => {
-            //         w.classList.remove('highlight');
-            //         const lab = w.querySelector('.label');
-            //         if (lab) lab.classList.remove('bold');
-            //     });
-            //     // clear black highlights
-            //     pianoEl.querySelectorAll('.black').forEach(b => {
-            //         b.classList.remove('highlight');
-            //     });
-            //     // clear all note-dot (even if not in white/black)
-            //     pianoEl.querySelectorAll('.note-dot').forEach(dot => dot.remove());
-            // }
-            function markMidi(midi) {
-                // Mark both white and black keys, add note-dot to both
-                const keyEl = pianoEl.querySelector(`[data-midi="${midi}"]`);
-                // if (!keyEl) return;
-                // keyEl.classList.add('highlight');
-                // if (keyEl.classList.contains('white')) {
-                //     const lab = keyEl.querySelector('.label');
-                //     if (lab) lab.classList.add('bold');
-                // }
-                if (!keyEl.querySelector('.note-dot')) {
-                    const d = document.createElement('div');
-                    d.className = 'note-dot';
-                    keyEl.appendChild(d);
-                }
+            function clearHighlights() {
+                // Do nothing: disables highlight and note-dot UI, but keeps logic for playback
+                // (Chord/scale/demo will still work, but no highlight/note-dot will show)
             }
-            // function highlightMidis(midis) {
-            //     clearHighlights();
-            //     midis.forEach(m => markMidi(m));
-            //     if (midis && midis.length > 0) {
-            //         setTimeout(() => clearHighlights(), 100);
-            //     }
-            // }
+            function markMidi(midi) {
+                // Show .active state for the key (white or black) for 50ms
+                const keyEl = pianoEl.querySelector(`[data-midi="${midi}"]`);
+                if (!keyEl) return;
+                keyEl.classList.add('active');
+                setTimeout(() => keyEl.classList.remove('active'), 200);
+            }
+            function highlightMidis(midis) {
+                // clearHighlights();
+                midis.forEach(m => markMidi(m));
+                // if (midis && midis.length > 0) {
+                //     setTimeout(() => clearHighlights(), 100);
+                // }
+            }
 
             // Mouse interactions (DO NOT highlight on manual play)
             let sustainOn = false;
@@ -900,12 +883,12 @@
             // Scale panel
             const scaleFormula = document.getElementById('scaleFormula'); const bpm = document.getElementById('bpm');
             function buildScale(rootName, rootOct, kind) { const rootMidi = nameToMidi(rootName, rootOct); const intervals = SCALES[kind]; const midis = intervals.map(i => rootMidi + i); scaleFormula.textContent = 'Formula: ' + intervals.join(' '); return midis; }
-            document.getElementById('playScale').onclick = async () => { const root = scaleRoot.value; const kind = scaleType.value; const dir = scaleDir.value; const rootOct = 4; let midis = buildScale(root, rootOct, kind); if (dir === 'down') { midis = [...midis].reverse(); } if (dir === 'updown') { midis = [...midis, ...midis.slice(0, -1).reverse()]; } highlightMidis(midis); const beat = 60 / Math.max(40, +bpm.value); for (const m of midis) { noteOn(m); await wait(beat * 1000); if (!sustainOn) noteOff(m); markMidi(m); } };
+            document.getElementById('playScale').onclick = async () => { const root = scaleRoot.value; const kind = scaleType.value; const dir = scaleDir.value; const rootOct = 4; let midis = buildScale(root, rootOct, kind); if (dir === 'down') { midis = [...midis].reverse(); } if (dir === 'updown') { midis = [...midis, ...midis.slice(0, -1).reverse()]; } /* highlightMidis(midis); */ const beat = 60 / Math.max(40, +bpm.value); for (const m of midis) { noteOn(m); markMidi(m); await wait(beat * 1000); if (!sustainOn) noteOff(m);} };
 
             // Chord panel
             const chordFormula = document.getElementById('chordFormula');
             function buildChord(rootName, rootOct, kind) { const rootMidi = nameToMidi(rootName, rootOct); const intervals = CHORDS[kind]; chordFormula.textContent = 'Intervals: ' + intervals.join(' '); return intervals.map(i => rootMidi + i) }
-            document.getElementById('playChord').onclick = async () => { const root = chordRoot.value; const kind = chordType.value; const mode = chordPlay.value; const rootOct = 4; const midis = buildChord(root, rootOct, kind); highlightMidis(midis); const beat = 60 / Math.max(40, +bpm.value); if (mode === 'block') { midis.forEach(m => noteOn(m)); setTimeout(() => { if (!sustainOn) midis.forEach(m => noteOff(m)); }, beat * 1000 * 2); } else if (mode === 'up') { for (const m of midis) { noteOn(m); await wait(beat * 1000); if (!sustainOn) noteOff(m); markMidi(m); } } else { for (const m of [...midis].reverse()) { noteOn(m); await wait(beat * 1000); if (!sustainOn) noteOff(m); markMidi(m); } } };
+            document.getElementById('playChord').onclick = async () => { const root = chordRoot.value; const kind = chordType.value; const mode = chordPlay.value; const rootOct = 4; const midis = buildChord(root, rootOct, kind); /* highlightMidis(midis); */ const beat = 60 / Math.max(40, +bpm.value); if (mode === 'block') { midis.forEach(m => noteOn(m)); setTimeout(() => { if (!sustainOn) midis.forEach(m => noteOff(m)); }, beat * 1000 * 2); } else if (mode === 'up') { for (const m of midis) { noteOn(m); markMidi(m); await wait(beat * 1000); if (!sustainOn) noteOff(m); } } else { for (const m of [...midis].reverse()) { noteOn(m); await wait(beat * 1000); if (!sustainOn) noteOff(m); markMidi(m); } } };
 
             // Ear Training panel (+ replay)
             const earMode = document.getElementById('earMode'); const earChoices = document.getElementById('earChoices'); const earFeedback = document.getElementById('earFeedback'); const earScoreEl = document.getElementById('earScore'); const earStreakEl = document.getElementById('earStreak'); const earBestEl = document.getElementById('earBest');
@@ -968,20 +951,17 @@
                 demoAbort = false; const name = demoSelect.value;
                 const seq = SONGS[name];
                 const beat = 60 / Math.max(40, +bpm.value);
-                highlightMidis(seq.map(x => x));
-                // for (const m of seq) {
-                //     if (demoAbort) break;
-                //     if (m != null && m !== -1) noteOn(m);
-                //     await wait(beat * 900);
-                //     if (m != null && m !== -1 && !sustainOn) noteOff(m); if (m != null && m !== -1) markMidi(m);
-                // }
                 for (const note of seq) {
                     if (demoAbort) break;
                     const dur = (note.duration || 1) * beat * 900;
-                    if (note.midi != null && note.midi !== -1) noteOn(note.midi);
+                    if (note.midi != null && note.midi !== -1) {
+                        // Clear all previous actives before marking new note
+                        pianoEl.querySelectorAll('.active').forEach(k => k.classList.remove('active'));
+                        noteOn(note.midi);
+                        markMidi(note.midi);
+                    }
                     await wait(dur);
                     if (note.midi != null && note.midi !== -1 && !sustainOn) noteOff(note.midi);
-                    if (note.midi != null && note.midi !== -1) markMidi(note.midi);
                 }
             };
             demoStop.onclick = () => { demoAbort = true;[...actives.keys()].forEach(noteOff); };
