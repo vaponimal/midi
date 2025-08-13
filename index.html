@@ -720,15 +720,7 @@
                     pianoEl.appendChild(b);
                 });
             }
-            function stopAllNotes() {
-                activeOscillators.forEach(({ osc, gainNode }) => {
-                    try {
-                        gainNode.gain.setTargetAtTime(0, audioCtx.currentTime, 0.05);
-                        osc.stop(audioCtx.currentTime + 0.05);
-                    } catch { }
-                });
-                activeOscillators = [];
-            }
+            // Remove broken/duplicate stopAllNotes. Use the correct one below.
             function clearHighlights() {
                 // Do nothing: disables highlight and note-dot UI, but keeps logic for playback
                 // (Chord/scale/demo will still work, but no highlight/note-dot will show)
@@ -751,7 +743,7 @@
             // Mouse interactions (DO NOT highlight on manual play)
             let sustainOn = false;
             pianoEl.addEventListener('mousedown', e => { const key = e.target.closest('[data-midi]'); if (!key) return; key.classList.add('active'); noteOn(+key.dataset.midi); });
-            pianoEl.addEventListener('mouseup', e => { const key = e.target.closest('[data-midi]'); if (!key) return; key.classList.remove('active'); if (!sustainOn) noteOff(+key.dataset.midi); });
+            pianoEl.addEventListener('mouseup', e => { const key = e.target.closest('[data-midi]'); if (!key) return; key.classList.remove('active'); noteOff(+key.dataset.midi); });
             pianoEl.addEventListener('mouseleave', () => { pianoEl.querySelectorAll('.active').forEach(k => { k.classList.remove('active'); if (!sustainOn) noteOff(+k.dataset.midi); }); });
 
             // Fix: Clear Highlights button
@@ -760,7 +752,7 @@
             // Keyboard mapping (DO NOT highlight on manual keyboard play)
             let baseOct = 4; const map = { 'z': 0, 's': 1, 'x': 2, 'd': 3, 'c': 4, 'v': 5, 'g': 6, 'b': 7, 'h': 8, 'n': 9, 'j': 10, 'm': 11 };
             window.addEventListener('keydown', e => { if (e.repeat) return; if (e.key === 'ArrowLeft') { baseOct = Math.max(1, baseOct - 1); return } if (e.key === 'ArrowRight') { baseOct = Math.min(7, baseOct + 1); return } const s = map[e.key.toLowerCase()]; if (s == null) return; const midi = nameToMidi(NOTES[s], baseOct); noteOn(midi); const el = pianoEl.querySelector(`[data-midi="${midi}"]`); if (el) { el.classList.add('active'); } });
-            window.addEventListener('keyup', e => { const s = map[e.key.toLowerCase()]; if (s == null) return; const midi = nameToMidi(NOTES[s], baseOct); if (!sustainOn) noteOff(midi); const el = pianoEl.querySelector(`[data-midi="${midi}"]`); if (el) el.classList.remove('active'); });
+            window.addEventListener('keyup', e => { const s = map[e.key.toLowerCase()]; if (s == null) return; const midi = nameToMidi(NOTES[s], baseOct); noteOff(midi); const el = pianoEl.querySelector(`[data-midi="${midi}"]`); if (el) el.classList.remove('active'); });
 
             // Controls (top shared)
             const waveType = document.getElementById('waveType');
@@ -838,6 +830,10 @@
                     // Stop all currently held notes
                     for (const [m, v] of activeVoices) stopAt(m, ctx.currentTime);
                 }
+            };
+            // Suspend button: stop all notes
+            document.getElementById('stopAllNotes').onclick = function () {
+                stopAllNotes();
             };
 
             // Tabs
@@ -964,7 +960,7 @@
                     if (note.midi != null && note.midi !== -1 && !sustainOn) noteOff(note.midi);
                 }
             };
-            demoStop.onclick = () => { demoAbort = true;[...actives.keys()].forEach(noteOff); };
+            demoStop.onclick = () => { demoAbort = true; stopAllNotes(); };
 
             // Helpers
             function randFrom(arr) { return arr[Math.floor(Math.random() * arr.length)] }
