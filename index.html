@@ -1001,6 +1001,10 @@
             function spawnFloatNotes() { const host = document.getElementById('floatNotes'); const glyphs = ['♪', '♫', '♬', '♩', '♭', '♯']; for (let i = 0; i < 14; i++) { const s = document.createElement('span'); s.textContent = randFrom(glyphs); s.style.left = Math.random() * 100 + 'vw'; s.style.animationDelay = (Math.random() * -12) + 's'; s.style.fontSize = (14 + Math.random() * 24) + 'px'; host.appendChild(s); } }
         })();
     </script>
+    <script>
+  window.va = window.va || function () { (window.vaq = window.vaq || []).push(arguments); };
+</script>
+<script defer src="/_vercel/insights/script.js"></script>
 </body>
 
 </html>
