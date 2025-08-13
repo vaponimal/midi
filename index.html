@@ -49,9 +49,9 @@
             display: flex;
             align-items: center;
             gap: 1.125rem;
-            padding: 14px 10.5rem;
-            border-bottom: 1px solid #232853;
-            background: linear-gradient(180deg, rgba(255, 255, 255, .06), transparent);
+            padding: 1em;
+            /* border-bottom: 1px solid #232853; */
+            /* background: linear-gradient(180deg, rgba(255, 255, 255, .06), transparent); */
             position: sticky;
             top: 0;
             z-index: 50;
@@ -60,11 +60,11 @@
 
         }
 
-        .navigation {
+        /* .navigation {
             z-index: 100;
             display: block;
             justify-content: space-between;
-        }
+        } */
 
         .logo {
             width: 40px;
@@ -105,7 +105,7 @@
         }
 
         .top-inner {
-            max-width: 1200px;
+            max-width: 100vw;
             margin: 0 auto;
             padding: 1em;
             display: flex;
@@ -134,7 +134,16 @@
             color: var(--muted)
         }
 
-        select,
+        select {
+            background: #0f1747;
+            color: var(--ink);
+            border: 1px solid #3340a6;
+            border-radius: 0.5rem;
+            padding: 0.5rem 0.3rem;
+            font-size: 1.125rem;
+            display: flex;
+        }
+
         button,
         input[type="number"],
         input[type="range"] {
@@ -397,12 +406,14 @@
         </div> -->
 
         <!-- PANEL TOP -->
-        <div class="tabs" role="tablist">
-            <div class="tab active" data-tab="notes" role="tab" aria-selected="true">🎹 Notes</div>
-            <div class="tab" data-tab="scales" role="tab">📈 Scales</div>
-            <div class="tab" data-tab="chords" role="tab">🎼 Chords</div>
-            <div class="tab" data-tab="ear" role="tab">👂 Ear Training</div>
-            <div class="tab" data-tab="demo" role="tab">🎵 Demo Songs</div>
+        <div>
+            <select id="panelSelect">
+                <option value="notes">🎹 Notes</option>
+                <option value="scales">📈 Scales</option>
+                <option value="chords">🎼 Chords</option>
+                <option value="ear">👂 Ear Training</option>
+                <option value="demo">🎵 Demo Songs</option>
+            </select>
         </div>
         <!-- </div> -->
     </header>
@@ -836,9 +847,15 @@
                 stopAllNotes();
             };
 
-            // Tabs
+            // Panel select dropdown
             const panels = { notes: document.getElementById('panel-notes'), scales: document.getElementById('panel-scales'), chords: document.getElementById('panel-chords'), ear: document.getElementById('panel-ear'), demo: document.getElementById('panel-demo') };
-            document.querySelectorAll('.tab').forEach(tab => { tab.addEventListener('click', () => { document.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); tab.classList.add('active'); Object.values(panels).forEach(p => p.style.display = 'none'); panels[tab.dataset.tab].style.display = 'block'; }); });
+            const panelSelect = document.getElementById('panelSelect');
+            panelSelect.addEventListener('change', function() {
+                Object.values(panels).forEach(p => p.style.display = 'none');
+                panels[this.value].style.display = 'block';
+            });
+            // Set default
+            panelSelect.value = 'notes';
 
             // Populate selects
             const noteSelect = document.getElementById('noteSelect'); const octaveSelect = document.getElementById('octaveSelect'); const scaleRoot = document.getElementById('scaleRoot'); const scaleType = document.getElementById('scaleType'); const chordRoot = document.getElementById('chordRoot'); const chordType = document.getElementById('chordType'); const scaleDir = document.getElementById('scaleDir'); const chordPlay = document.getElementById('chordPlay');
