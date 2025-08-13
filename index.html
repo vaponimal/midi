@@ -376,8 +376,8 @@
     <header>
         <div class="logo" aria-hidden="true"></div>
         <div>
-            <h1>Music Theory Trainer</h1>
-            <div class="subtitle">Learn notes, scales, chords — and train your ears with a playful piano.</div>
+            <h1>Virtual MIDI Keyboard</h1>
+            <div class="subtitle">Learn notes, scales, chords — and train your ears with a playful keyboard.</div>
         </div>
     </header>
 
@@ -501,6 +501,10 @@
                 <div class="row">
                     <label>Song</label>
                     <select id="demoSong"></select>
+                    <span>
+                        <button id="bpmBtn" type="button" style="min-width:5rem"></button>
+                        <input id="bpm" type="number" min="40" max="240" value="120" style="width:5rem;display:none">
+                    </span>
                     <button id="demoStop">Stop</button>
                     <button id="demoPlay" class="primary">Play</button>
                 </div>
@@ -520,18 +524,14 @@
                 </span>
                 <button id="applyRange">Apply Range</button>
             </div>
-            <div class="controls">
+            <div class="row">
                 <button id="sustain">Sustain: Off</button>
-                <span class="pilltransparent"><span style="opacity:.7"></span>
+                <span>
                     <button id="volumeBtn" type="button" style="min-width:5rem"></button>
                     <input id="volume" type="range" min="0" max="1" step="0.01" value="0.4"
                         style="width:5rem;display:none">
                 </span>
-                <span class="pilltransparent"><span style="opacity:.7"></span>
-                    <button id="bpmBtn" type="button" style="min-width:5rem"></button>
-                    <input id="bpm" type="number" min="40" max="240" value="120" style="width:5rem;display:none">
-                </span>
-                <span class="pilltransparent"><span style="opacity:.7"></span>
+                <span>
                     <button id="waveBtn" type="button" style="min-width:5rem"></button>
                     <select id="waveType" style="display:none">
                         <option value="sine">sine</option>
